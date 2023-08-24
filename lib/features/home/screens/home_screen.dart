@@ -5,6 +5,7 @@ import 'package:reddit_clone/features/home/drawers/community_list_drawer.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
   void displayDrawer(BuildContext context) {
     Scaffold.of(context).openDrawer();
   }
