@@ -10,7 +10,7 @@ import 'package:reddit_clone/core/providers/firebase_providers.dart';
 import 'package:reddit_clone/core/type_defs.dart';
 import 'package:reddit_clone/models/user_model.dart';
 
-//provider
+//authRepository provider
 
 final authRepositoryProvider = Provider((ref) => AuthRepository(
     auth: ref.read(authProvider),
@@ -32,6 +32,9 @@ class AuthRepository {
 
   CollectionReference get _users =>
       _firestore.collection(FirebaseConstants.usersCollection);
+
+//Stream for authStatechange
+  Stream<User?> get authStateChange => _auth.authStateChanges();
 
   FutureEither<UserModel> signInWithGoogle() async {
     late UserModel userModel;
@@ -63,12 +66,17 @@ class AuthRepository {
     } on FirebaseAuthException catch (e) {
       rethrow;
     } catch (e) {
-      return left(Failure(e.toString()));
+      return left(
+        Failure(
+          e.toString(),
+        ),
+      );
     }
   }
 
   Stream<UserModel> getUserData(String uid) {
     return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+          (event) => UserModel.fromMap(event.data() as Map<String, dynamic>),
+        );
   }
 }
