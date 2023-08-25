@@ -4,6 +4,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit_clone/core/common/error_text.dart';
 import 'package:reddit_clone/core/common/loader.dart';
+import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/community/controller/community_controller.dart';
 
 class CommunityScreen extends ConsumerWidget {
@@ -14,6 +15,7 @@ class CommunityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider)!;
     return Scaffold(
       body: ref.watch(communityByNameProvider(name)).when(
             data: (community) => NestedScrollView(
@@ -54,14 +56,28 @@ class CommunityScreen extends ConsumerWidget {
                             'r/${community.name}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          OutlinedButton(
-                              style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 25),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
-                              onPressed: () {},
-                              child: const Text('Join'))
+                          community.mods.contains(user.uid)
+                              ? OutlinedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 25),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20))),
+                                  onPressed: () {},
+                                  child: const Text('Mod Tools'))
+                              : OutlinedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 25),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20))),
+                                  onPressed: () {},
+                                  child: Text(
+                                      community.members.contains(user.uid)
+                                          ? 'Join'
+                                          : 'Joined'))
                         ],
                       ),
                       Padding(
