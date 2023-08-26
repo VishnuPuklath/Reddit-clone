@@ -6,12 +6,17 @@ import 'package:reddit_clone/core/common/error_text.dart';
 import 'package:reddit_clone/core/common/loader.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/community/controller/community_controller.dart';
+import 'package:routemaster/routemaster.dart';
 
 class CommunityScreen extends ConsumerWidget {
   final String name;
   CommunityScreen({
     required this.name,
   });
+
+  void navigateToModTools(BuildContext context) {
+    Routemaster.of(context).push('/mod-tools/$name');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,7 +69,7 @@ class CommunityScreen extends ConsumerWidget {
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(20))),
-                                  onPressed: () {},
+                                  onPressed: () => navigateToModTools(context),
                                   child: const Text('Mod Tools'))
                               : OutlinedButton(
                                   style: ElevatedButton.styleFrom(
