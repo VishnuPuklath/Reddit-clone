@@ -15,6 +15,13 @@ final communityByNameProvider = StreamProvider.family((ref, String name) {
   final communityController = ref.watch(communityControllerProvider.notifier);
   return communityController.getCommunityByName(name);
 });
+
+//stream provider for search query
+
+final searchCommunityProvider = StreamProvider.family((ref, String query) {
+  return ref.watch(communityControllerProvider.notifier).searchCommunity(query);
+});
+
 //stream provider for userCommunities
 final userCommunitiesProvider = StreamProvider((ref) {
   final communityController = ref.watch(communityControllerProvider.notifier);
@@ -71,6 +78,10 @@ class CommunityController extends StateNotifier<bool> {
 
   Stream<Community> getCommunityByName(String name) {
     return _communityRepository.getCommunityByName(name);
+  }
+
+  Stream<List<Community>> searchCommunity(String query) {
+    return _communityRepository.searchCommunity(query);
   }
 
   void editCommunity(
