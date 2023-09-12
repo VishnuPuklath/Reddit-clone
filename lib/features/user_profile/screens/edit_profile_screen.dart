@@ -24,6 +24,7 @@ class _EditUserProfileState extends ConsumerState<EditUserProfile> {
   late TextEditingController nameController;
   File? bannerFile;
   File? avatarFile;
+
   void selectBannerImage() async {
     final res = await pickImage();
     if (res != null) {
