@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +19,12 @@ final postControllerProvider =
       postRepository: ref.read(postRepositoryProvider),
       ref: ref,
       storageRepository: ref.read(storageRepositoryProvider));
+});
+
+final userPostsProvider =
+    StreamProvider.family((ref, List<Community> communities) {
+  final postController = ref.read(postControllerProvider.notifier);
+  return postController.fetchUserPosts(communities);
 });
 
 class PostController extends StateNotifier<bool> {
@@ -44,6 +49,7 @@ class PostController extends StateNotifier<bool> {
     String postId = const Uuid().v1();
     final user = _ref.read(userProvider)!;
     Post post = Post(
+        title: title,
         id: postId,
         description: description,
         communityName: selectedCommunity.name,
@@ -65,17 +71,56 @@ class PostController extends StateNotifier<bool> {
               showSnackBar(text: 'Posted Successfully', context: context),
               Routemaster.of(context).pop()
             });
+  }
 
-    void shareLinkPost(
-        {required BuildContext context,
-        required String title,
-        required Community selectedCommunity,
-        required String link}) async {
-      state = true;
-      String postId = const Uuid().v1();
-      final user = _ref.read(userProvider)!;
+  void shareLinkPost(
+      {required BuildContext context,
+      required String title,
+      required Community selectedCommunity,
+      required String link}) async {
+    state = true;
+    String postId = const Uuid().v1();
+    final user = _ref.read(userProvider)!;
+    Post post = Post(
+        title: title,
+        link: link,
+        id: postId,
+        communityName: selectedCommunity.name,
+        communityProfilePic: selectedCommunity.avatar,
+        upvotes: [],
+        downvotes: [],
+        commentCount: 0,
+        username: user.name,
+        uid: user.uid,
+        type: 'link',
+        createdAt: DateTime.now(),
+        awards: []);
+
+    final res = await _postRepository.post(post);
+    state = false;
+    res.fold(
+        (l) => showSnackBar(text: l.message, context: context),
+        (r) => {
+              showSnackBar(text: 'Posted Successfully', context: context),
+              Routemaster.of(context).pop()
+            });
+  }
+
+  void shareImagePost(
+      {required BuildContext context,
+      required String title,
+      required Community selectedCommunity,
+      required File? file}) async {
+    state = true;
+    String postId = const Uuid().v1();
+    final user = _ref.read(userProvider)!;
+    final imageRes = await _storageRepository.storeFile(
+        path: 'posts/${selectedCommunity.name}', id: postId, file: file);
+
+    imageRes.fold((l) => Failure(l.message), (r) async {
       Post post = Post(
-          link: link,
+          title: title,
+          link: r,
           id: postId,
           communityName: selectedCommunity.name,
           communityProfilePic: selectedCommunity.avatar,
@@ -84,7 +129,7 @@ class PostController extends StateNotifier<bool> {
           commentCount: 0,
           username: user.name,
           uid: user.uid,
-          type: 'link',
+          type: 'image',
           createdAt: DateTime.now(),
           awards: []);
 
@@ -96,43 +141,22 @@ class PostController extends StateNotifier<bool> {
                 showSnackBar(text: 'Posted Successfully', context: context),
                 Routemaster.of(context).pop()
               });
-    }
+    });
+  }
 
-    void shareImagePost(
-        {required BuildContext context,
-        required String title,
-        required Community selectedCommunity,
-        required File? file}) async {
-      state = true;
-      String postId = const Uuid().v1();
-      final user = _ref.read(userProvider)!;
-      final imageRes = await _storageRepository.storeFile(
-          path: 'posts/${selectedCommunity.name}', id: postId, file: file);
+  void deletePost(Post post, BuildContext context) async {
+    final res = await _ref.read(postRepositoryProvider).deletePost(post);
+    res.fold(
+      (l) => showSnackBar(context: context, text: l.message),
+      (r) => showSnackBar(context: context, text: 'Post deleted successfully'),
+    );
+  }
 
-      imageRes.fold((l) => Failure(l.message), (r) async {
-        Post post = Post(
-            link: r,
-            id: postId,
-            communityName: selectedCommunity.name,
-            communityProfilePic: selectedCommunity.avatar,
-            upvotes: [],
-            downvotes: [],
-            commentCount: 0,
-            username: user.name,
-            uid: user.uid,
-            type: 'image',
-            createdAt: DateTime.now(),
-            awards: []);
-
-        final res = await _postRepository.post(post);
-        state = false;
-        res.fold(
-            (l) => showSnackBar(text: l.message, context: context),
-            (r) => {
-                  showSnackBar(text: 'Posted Successfully', context: context),
-                  Routemaster.of(context).pop()
-                });
-      });
+  Stream<List<Post>> fetchUserPosts(List<Community> communities) {
+    if (communities.isNotEmpty) {
+      return _ref.read(postRepositoryProvider).fetchUserPosts(communities);
+    } else {
+      return Stream.value([]);
     }
   }
 }

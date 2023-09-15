@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 class Post {
   final String id;
   final String? link;
+  final String title;
   final String? description;
   final String communityName;
   final String communityProfilePic;
@@ -19,6 +20,7 @@ class Post {
   Post({
     required this.id,
     this.link,
+    required this.title,
     this.description,
     required this.communityName,
     required this.communityProfilePic,
@@ -35,6 +37,7 @@ class Post {
   Post copyWith({
     String? id,
     String? link,
+    String? title,
     String? description,
     String? communityName,
     String? communityProfilePic,
@@ -50,6 +53,7 @@ class Post {
     return Post(
       id: id ?? this.id,
       link: link ?? this.link,
+      title: title ?? this.title,
       description: description ?? this.description,
       communityName: communityName ?? this.communityName,
       communityProfilePic: communityProfilePic ?? this.communityProfilePic,
@@ -68,6 +72,7 @@ class Post {
     return {
       'id': id,
       'link': link,
+      'title': title,
       'description': description,
       'communityName': communityName,
       'communityProfilePic': communityProfilePic,
@@ -86,7 +91,8 @@ class Post {
     return Post(
       id: map['id'] ?? '',
       link: map['link'],
-      description: map['description'] ?? '',
+      title: map['title'] ?? '',
+      description: map['description'],
       communityName: map['communityName'] ?? '',
       communityProfilePic: map['communityProfilePic'] ?? '',
       upvotes: List<String>.from(map['upvotes']),
@@ -100,9 +106,13 @@ class Post {
     );
   }
 
+  String toJson() => json.encode(toMap());
+
+  factory Post.fromJson(String source) => Post.fromMap(json.decode(source));
+
   @override
   String toString() {
-    return 'Post(id: $id, link: $link, description: $description, communityName: $communityName, communityProfilePic: $communityProfilePic, upvotes: $upvotes, downvotes: $downvotes, commentCount: $commentCount, username: $username, uid: $uid, type: $type, createdAt: $createdAt, awards: $awards)';
+    return 'Post(id: $id, link: $link, title: $title, description: $description, communityName: $communityName, communityProfilePic: $communityProfilePic, upvotes: $upvotes, downvotes: $downvotes, commentCount: $commentCount, username: $username, uid: $uid, type: $type, createdAt: $createdAt, awards: $awards)';
   }
 
   @override
@@ -112,6 +122,7 @@ class Post {
     return other is Post &&
         other.id == id &&
         other.link == link &&
+        other.title == title &&
         other.description == description &&
         other.communityName == communityName &&
         other.communityProfilePic == communityProfilePic &&
@@ -129,6 +140,7 @@ class Post {
   int get hashCode {
     return id.hashCode ^
         link.hashCode ^
+        title.hashCode ^
         description.hashCode ^
         communityName.hashCode ^
         communityProfilePic.hashCode ^
