@@ -55,4 +55,38 @@ class PostRepository {
             .map((e) => Post.fromMap(e.data() as Map<String, dynamic>))
             .toList());
   }
+
+  void upvotes(Post post, String userId) async {
+    if (post.downvotes.contains(userId)) {
+      _posts.doc(post.id).update({
+        'downvotes': FieldValue.arrayRemove([userId])
+      });
+    }
+    if (post.upvotes.contains(userId)) {
+      _posts.doc(post.id).update({
+        'upvotes': FieldValue.arrayRemove([userId])
+      });
+    } else {
+      _posts.doc(post.id).update({
+        'upvotes': FieldValue.arrayUnion([userId])
+      });
+    }
+  }
+
+  void downvotes(Post post, String userId) async {
+    if (post.upvotes.contains(userId)) {
+      _posts.doc(post.id).update({
+        'upvotes': FieldValue.arrayRemove([userId])
+      });
+    }
+    if (post.downvotes.contains(userId)) {
+      _posts.doc(post.id).update({
+        'downvotes': FieldValue.arrayRemove([userId])
+      });
+    } else {
+      _posts.doc(post.id).update({
+        'downvotes': FieldValue.arrayUnion([userId])
+      });
+    }
+  }
 }

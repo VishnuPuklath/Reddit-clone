@@ -159,4 +159,12 @@ class PostController extends StateNotifier<bool> {
       return Stream.value([]);
     }
   }
+
+  void upvotes(Post post, String userId) async {
+    _ref.read(postRepositoryProvider).upvotes(post, userId);
+  }
+
+  void downvotes(Post post, String userId) async {
+    _ref.read(postRepositoryProvider).downvotes(post, userId);
+  }
 }

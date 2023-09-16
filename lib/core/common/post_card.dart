@@ -23,6 +23,14 @@ class PostCard extends ConsumerWidget {
       ref.read(postControllerProvider.notifier).deletePost(post, context);
     }
 
+    void upvotes(String userId) {
+      ref.read(postControllerProvider.notifier).upvotes(post, userId);
+    }
+
+    void downvotes(String userId) {
+      ref.read(postControllerProvider.notifier).downvotes(post, userId);
+    }
+
     return Column(
       children: [
         Container(
@@ -116,7 +124,7 @@ class PostCard extends ConsumerWidget {
                           Row(
                             children: [
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () => upvotes(user.uid),
                                 icon: Icon(
                                   Constants.up,
                                   size: 30,
@@ -130,11 +138,11 @@ class PostCard extends ConsumerWidget {
                                 style: const TextStyle(fontSize: 17),
                               ),
                               IconButton(
-                                  onPressed: () {},
+                                  onPressed: () => downvotes(user.uid),
                                   icon: Icon(
                                     Constants.down,
                                     size: 30,
-                                    color: post.upvotes.contains(user.uid)
+                                    color: post.downvotes.contains(user.uid)
                                         ? Pallete.blueColor
                                         : null,
                                   ))
