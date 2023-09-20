@@ -11,12 +11,20 @@ import 'package:reddit_clone/core/utils.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/community/repository/community_repository.dart';
 import 'package:reddit_clone/models/community_model.dart';
+import 'package:reddit_clone/models/post_model.dart';
 import 'package:routemaster/routemaster.dart';
 //stream provider for getting community by name
 
 final communityByNameProvider = StreamProvider.family((ref, String name) {
   final communityController = ref.watch(communityControllerProvider.notifier);
   return communityController.getCommunityByName(name);
+});
+
+///
+final communityPostProvider = StreamProvider.family((ref, String name) {
+  return ref
+      .watch(communityControllerProvider.notifier)
+      .getCommunityPosts(name);
 });
 
 //stream provider for search query
@@ -126,6 +134,10 @@ class CommunityController extends StateNotifier<bool> {
             context: context, text: 'Community Joined successfully!!!');
       }
     });
+  }
+
+  Stream<List<Post>> getCommunityPosts(String name) {
+    return _communityRepository.getCommunityPosts(name);
   }
 
   void addMods(

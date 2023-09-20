@@ -43,6 +43,10 @@ class PostCard extends ConsumerWidget {
       Routemaster.of(context).push('/r/${post.communityName}');
     }
 
+    void navigateToComments(BuildContext context) {
+      Routemaster.of(context).push('/post/${post.id}/comments');
+    }
+
     return Column(
       children: [
         Container(
@@ -170,7 +174,8 @@ class PostCard extends ConsumerWidget {
                               Row(
                                 children: [
                                   IconButton(
-                                    onPressed: () {},
+                                    onPressed: () =>
+                                        navigateToComments(context),
                                     icon: const Icon(
                                       Icons.comment,
                                     ),

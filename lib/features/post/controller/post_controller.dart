@@ -8,6 +8,7 @@ import 'package:reddit_clone/core/type_defs.dart';
 import 'package:reddit_clone/core/utils.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/post/repository/post_repository.dart';
+import 'package:reddit_clone/models/comment_model.dart';
 import 'package:reddit_clone/models/community_model.dart';
 import 'package:reddit_clone/models/post_model.dart';
 import 'package:routemaster/routemaster.dart';
@@ -25,6 +26,15 @@ final userPostsProvider =
     StreamProvider.family((ref, List<Community> communities) {
   final postController = ref.read(postControllerProvider.notifier);
   return postController.fetchUserPosts(communities);
+});
+
+//stream provider for post by id
+final getPostByIdProvider = StreamProvider.family((ref, String postId) {
+  return ref.read(postControllerProvider.notifier).getPostById(postId);
+});
+//stream provider for comments by post id
+final getPostsCommentsProvider = StreamProvider.family((ref, String postId) {
+  return ref.read(postControllerProvider.notifier).getCommentsOfPost(postId);
 });
 
 class PostController extends StateNotifier<bool> {
@@ -166,5 +176,28 @@ class PostController extends StateNotifier<bool> {
 
   void downvotes(Post post, String userId) async {
     _ref.read(postRepositoryProvider).downvotes(post, userId);
+  }
+
+  Stream<Post> getPostById(String id) {
+    return _postRepository.getPostById(id);
+  }
+
+  void addComment(String text, BuildContext context, String postId) async {
+    final user = _ref.read(userProvider)!;
+    String commentId = const Uuid().v1();
+    Comment comment = Comment(
+        id: commentId,
+        createdAt: DateTime.now(),
+        postId: postId,
+        profilePic: user.profilePic,
+        text: text,
+        username: user.name);
+    final res = await _postRepository.addComment(comment);
+    res.fold(
+        (l) => showSnackBar(context: context, text: l.message), (r) => null);
+  }
+
+  Stream<List<Comment>> getCommentsOfPost(String postId) {
+    return _postRepository.getCommentsOfPost(postId);
   }
 }
