@@ -9,6 +9,7 @@ import 'package:reddit_clone/core/type_defs.dart';
 import 'package:reddit_clone/models/comment_model.dart';
 import 'package:reddit_clone/models/community_model.dart';
 import 'package:reddit_clone/models/post_model.dart';
+import 'package:reddit_clone/models/user_model.dart';
 
 final postRepositoryProvider = Provider((ref) {
   return PostRepository(firestore: ref.read(firestoreProvider));
@@ -23,7 +24,8 @@ class PostRepository {
       _firestore.collection(FirebaseConstants.postsCollection);
   CollectionReference get _comments =>
       _firestore.collection(FirebaseConstants.commentsCollection);
-
+  CollectionReference get _users =>
+      _firestore.collection(FirebaseConstants.usersCollection);
   FutureVoid post(Post post) async {
     try {
       return right(_posts.doc(post.id).set(post.toMap()));
@@ -121,5 +123,34 @@ class PostRepository {
         .map((event) => event.docs
             .map((e) => Comment.fromMap(e.data() as Map<String, dynamic>))
             .toList());
+  }
+
+  FutureVoid updateUserKarma(UserModel userModel) async {
+    try {
+      return right(
+          _users.doc(userModel.uid).update({'karma': userModel.karma}));
+    } on FirebaseException catch (e) {
+      rethrow;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  FutureVoid awardPost(Post post, String award, String senderId) async {
+    try {
+      _posts.doc(post.id).update({
+        'awards': FieldValue.arrayUnion([award]),
+      });
+      _users.doc(senderId).update({
+        'awards': FieldValue.arrayRemove([award])
+      });
+      return right(_users.doc(post.uid).update({
+        'awards': FieldValue.arrayUnion([award])
+      }));
+    } on FirebaseException catch (e) {
+      rethrow;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 }

@@ -35,6 +35,12 @@ class PostCard extends ConsumerWidget {
       ref.read(postControllerProvider.notifier).downvotes(post, userId);
     }
 
+    void awardPost(String award, BuildContext context) {
+      ref
+          .read(postControllerProvider.notifier)
+          .awardPost(award: award, context: context, post: post);
+    }
+
     void navigateToUser(BuildContext context) {
       Routemaster.of(context).push('/u/${post.uid}');
     }
@@ -109,6 +115,25 @@ class PostCard extends ConsumerWidget {
                                 )
                             ],
                           ),
+                          if (post.awards.isNotEmpty) ...[
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            const SizedBox(
+                              height: 25,
+                            ),
+                            ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: post.awards.length,
+                              itemBuilder: (context, index) {
+                                final award = post.awards[index];
+                                return Image.asset(
+                                  Constants.awards[award]!,
+                                  height: 23,
+                                );
+                              },
+                            )
+                          ],
                           Text(
                             post.title,
                             style: const TextStyle(
@@ -203,7 +228,41 @@ class PostCard extends ConsumerWidget {
                                         error: (error, stackTrace) =>
                                             ErrorText(error: error.toString()),
                                         loading: () => const Loader(),
-                                      )
+                                      ),
+                                  IconButton(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => Dialog(
+                                              child: Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: GridView.builder(
+                                              shrinkWrap: true,
+                                              itemCount: user.awards.length,
+                                              gridDelegate:
+                                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 4),
+                                              itemBuilder: (context, index) {
+                                                final awards =
+                                                    user.awards[index];
+                                                return GestureDetector(
+                                                  onTap: () => awardPost(
+                                                      awards, context),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Image.asset(Constants
+                                                        .awards[awards]!),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          )),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                          Icons.card_giftcard_outlined))
                                 ],
                               )
                             ],

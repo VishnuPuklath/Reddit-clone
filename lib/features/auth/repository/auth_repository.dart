@@ -56,7 +56,7 @@ class AuthRepository {
             banner: Constants.bannerDefault,
             isAuthenticated: true,
             karma: 0,
-            awards: []);
+            awards: ['til', 'gold', 'platinum', 'plusone']);
 
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
